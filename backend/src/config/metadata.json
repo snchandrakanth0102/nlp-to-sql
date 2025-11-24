@@ -1,0 +1,260 @@
+{
+    "connections": {
+        "retail_db": {
+            "name": "Retail Database",
+            "description": "Retail store database with customers, products, and orders",
+            "businessDomain": "Retail",
+            "dataCategory": "Transactional",
+            "tables": [
+                {
+                    "tableName": "customers",
+                    "description": "Stores customer details",
+                    "businessDomain": "Retail",
+                    "dataCategory": "Transactional",
+                    "primaryKey": [
+                        "customer_id"
+                    ],
+                    "columns": [
+                        {
+                            "name": "customer_id",
+                            "type": "int",
+                            "description": "Unique ID of the customer",
+                            "businessMeaning": "Identifier for the customer",
+                            "isPrimaryKey": true,
+                            "isForeignKey": false,
+                            "isNullable": false,
+                            "isIndexed": true,
+                            "isSearchable": true
+                        },
+                        {
+                            "name": "first_name",
+                            "type": "varchar(50)",
+                            "description": "Customer's first name",
+                            "businessMeaning": "First name of the customer"
+                        },
+                        {
+                            "name": "last_name",
+                            "type": "varchar(50)",
+                            "description": "Customer's last name",
+                            "businessMeaning": "Last name of the customer"
+                        },
+                        {
+                            "name": "email",
+                            "type": "varchar(100)",
+                            "description": "Customer's email address",
+                            "businessMeaning": "Contact email of the customer"
+                        },
+                        {
+                            "name": "city",
+                            "type": "varchar(50)",
+                            "description": "City where the customer resides",
+                            "businessMeaning": "Customer's city"
+                        },
+                        {
+                            "name": "signup_date",
+                            "type": "date",
+                            "description": "Date when the customer signed up",
+                            "businessMeaning": "Registration date"
+                        }
+                    ],
+                    "totalRecords": 1000,
+                    "retentionPolicy": "10 years"
+                },
+                {
+                    "tableName": "products",
+                    "description": "Stores product information",
+                    "businessDomain": "Retail",
+                    "dataCategory": "Master",
+                    "primaryKey": [
+                        "product_id"
+                    ],
+                    "columns": [
+                        {
+                            "name": "product_id",
+                            "type": "int",
+                            "description": "Unique ID of the product",
+                            "businessMeaning": "Identifier for the product",
+                            "isPrimaryKey": true,
+                            "isForeignKey": false,
+                            "isNullable": false,
+                            "isIndexed": true,
+                            "isSearchable": true
+                        },
+                        {
+                            "name": "product_name",
+                            "type": "varchar(100)",
+                            "description": "Name of the product",
+                            "businessMeaning": "Product name"
+                        },
+                        {
+                            "name": "category",
+                            "type": "varchar(50)",
+                            "description": "Product category",
+                            "businessMeaning": "Category of the product"
+                        },
+                        {
+                            "name": "price",
+                            "type": "decimal(10, 2)",
+                            "description": "Price of the product",
+                            "businessMeaning": "Selling price"
+                        },
+                        {
+                            "name": "stock_quantity",
+                            "type": "int",
+                            "description": "Quantity in stock",
+                            "businessMeaning": "Available stock"
+                        }
+                    ],
+                    "totalRecords": 500,
+                    "retentionPolicy": "Indefinite"
+                },
+                {
+                    "tableName": "orders",
+                    "description": "Stores order details",
+                    "businessDomain": "Retail",
+                    "dataCategory": "Transactional",
+                    "primaryKey": [
+                        "order_id"
+                    ],
+                    "columns": [
+                        {
+                            "name": "order_id",
+                            "type": "int",
+                            "description": "Unique ID of the order",
+                            "businessMeaning": "Identifier for the order",
+                            "isPrimaryKey": true,
+                            "isForeignKey": false,
+                            "isNullable": false,
+                            "isIndexed": true,
+                            "isSearchable": true
+                        },
+                        {
+                            "name": "customer_id",
+                            "type": "int",
+                            "description": "Reference to the customer",
+                            "isPrimaryKey": false,
+                            "isForeignKey": true,
+                            "referencedTable": "customers",
+                            "referencedColumn": "customer_id",
+                            "isNullable": false
+                        },
+                        {
+                            "name": "order_date",
+                            "type": "date",
+                            "description": "Date of the order",
+                            "businessMeaning": "Order placement date"
+                        },
+                        {
+                            "name": "total_amount",
+                            "type": "decimal(10, 2)",
+                            "description": "Total amount of the order",
+                            "businessMeaning": "Order total value"
+                        },
+                        {
+                            "name": "status",
+                            "type": "varchar(20)",
+                            "description": "Status of the order",
+                            "businessMeaning": "Current order status"
+                        }
+                    ],
+                    "totalRecords": 5000,
+                    "retentionPolicy": "7 years"
+                },
+                {
+                    "tableName": "order_items",
+                    "description": "Stores items within an order",
+                    "businessDomain": "Retail",
+                    "dataCategory": "Transactional",
+                    "primaryKey": [
+                        "item_id"
+                    ],
+                    "columns": [
+                        {
+                            "name": "item_id",
+                            "type": "int",
+                            "description": "Unique ID of the order item",
+                            "businessMeaning": "Identifier for the order item",
+                            "isPrimaryKey": true,
+                            "isForeignKey": false,
+                            "isNullable": false,
+                            "isIndexed": true,
+                            "isSearchable": true
+                        },
+                        {
+                            "name": "order_id",
+                            "type": "int",
+                            "description": "Reference to the order",
+                            "isPrimaryKey": false,
+                            "isForeignKey": true,
+                            "referencedTable": "orders",
+                            "referencedColumn": "order_id",
+                            "isNullable": false
+                        },
+                        {
+                            "name": "product_id",
+                            "type": "int",
+                            "description": "Reference to the product",
+                            "isPrimaryKey": false,
+                            "isForeignKey": true,
+                            "referencedTable": "products",
+                            "referencedColumn": "product_id",
+                            "isNullable": false
+                        },
+                        {
+                            "name": "quantity",
+                            "type": "int",
+                            "description": "Quantity of the product",
+                            "businessMeaning": "Number of units ordered"
+                        },
+                        {
+                            "name": "unit_price",
+                            "type": "decimal(10, 2)",
+                            "description": "Price per unit",
+                            "businessMeaning": "Unit price at time of order"
+                        }
+                    ],
+                    "totalRecords": 15000,
+                    "retentionPolicy": "7 years"
+                }
+            ],
+            "relationships": [
+                {
+                    "relationshipId": "customer_to_orders",
+                    "description": "Links customers to their orders.",
+                    "masterTable": "customers",
+                    "masterColumn": "customer_id",
+                    "childTable": "orders",
+                    "childColumn": "customer_id",
+                    "relationshipType": "ONE_TO_MANY",
+                    "cascadeDelete": false,
+                    "cascadeUpdate": false,
+                    "isMandatory": true
+                },
+                {
+                    "relationshipId": "order_to_items",
+                    "description": "Links orders to their items.",
+                    "masterTable": "orders",
+                    "masterColumn": "order_id",
+                    "childTable": "order_items",
+                    "childColumn": "order_id",
+                    "relationshipType": "ONE_TO_MANY",
+                    "cascadeDelete": true,
+                    "cascadeUpdate": false,
+                    "isMandatory": true
+                },
+                {
+                    "relationshipId": "product_to_items",
+                    "description": "Links products to order items.",
+                    "masterTable": "products",
+                    "masterColumn": "product_id",
+                    "childTable": "order_items",
+                    "childColumn": "product_id",
+                    "relationshipType": "ONE_TO_MANY",
+                    "cascadeDelete": false,
+                    "cascadeUpdate": false,
+                    "isMandatory": true
+                }
+            ]
+        }
+    }
+}
