@@ -14,18 +14,14 @@ class RAGService {
             const schemaItems = await schemaIngestionService.fetchSchema(connection);
 
             // 2. Generate Embeddings & Store
-            // For simplicity, we'll just store the raw text description as "embedding" source
-            // In a real app, we'd call an embedding API here.
-            // vectorStoreService expects { tableName, description, embedding }
-            // We will mock the embedding generation or just store it.
-
-            // Assuming vectorStoreService handles the "embedding" part or we just store text for now.
-            // Let's check vectorStoreService again. It does cosine similarity, so it needs vectors.
-            // For this demo, we might skip actual vector generation if not implemented, 
-            // or use a dummy vector.
-
             const itemsWithEmbeddings = await Promise.all(schemaItems.map(async item => {
-                const embedding = await geminiService.getEmbeddings(item.description);
+                let embedding;
+                if (connection.type === 'mock') {
+                    // Generate random embedding for mock DB (768 dimensions)
+                    embedding = Array(768).fill(0).map(() => Math.random());
+                } else {
+                    embedding = await geminiService.getEmbeddings(item.description);
+                }
                 return { ...item, embedding };
             }));
 
@@ -43,6 +39,29 @@ class RAGService {
     }
 
     async generateSQL(question, connectionId, conversationHistory = []) {
+        const connection = await connectionService.getConnectionById(connectionId);
+
+        // Mock DB Logic - simple keyword matching for testing
+        if (connection && connection.type === 'mock') {
+            let sql = "SELECT 'I cannot answer this' as error";
+            let relevantTables = [];
+
+            const lowerQ = question.toLowerCase();
+            if (lowerQ.includes('user')) {
+                sql = "SELECT * FROM users";
+                relevantTables = ['users'];
+            } else if (lowerQ.includes('order')) {
+                sql = "SELECT * FROM orders";
+                relevantTables = ['orders'];
+            } else if (lowerQ.includes('product')) {
+                sql = "SELECT * FROM products";
+                relevantTables = ['products'];
+            }
+
+            return { sql, relevantTables };
+        }
+
+        // Real DB Logic - RAG with Gemini
         // 1. Get relevant tables (RAG)
         const queryEmbedding = await geminiService.getEmbeddings(question);
         const relevantItems = await vectorStoreService.search(queryEmbedding, connectionId, 5);

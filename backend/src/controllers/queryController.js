@@ -112,8 +112,10 @@ class QueryController {
 
                 // Generate Insights
                 if (results && results.length > 0) {
-                    const insights = await geminiService.generateInsights(preValidation.sanitizedInput, results);
-                    response.insights = insights;
+                    const insightsData = await geminiService.generateInsights(preValidation.sanitizedInput, results);
+                    response.insights = insightsData.insights;
+                    response.recommendedChartType = insightsData.recommendedChartType;
+                    response.suggestedQuestions = insightsData.suggestedQuestions || [];
                 }
             }
 
