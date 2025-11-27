@@ -53,14 +53,7 @@ class GeminiService {
                     "Mock Insight 1: The data shows a positive trend in user growth.",
                     "Mock Insight 2: Significant spike observed in the last quarter."
                 ],
-                recommendedChartType: "bar",
-                suggestedQuestions: [
-                    "What is the total count?",
-                    "Show top 5 by value",
-                    "How does this compare to last month?",
-                    "What are the trends over time?",
-                    "Show detailed breakdown by category"
-                ]
+                recommendedChartType: "bar"
             };
         }
         try {
@@ -73,8 +66,7 @@ class GeminiService {
             Analyze the data and the user's question. Return a JSON object with the following structure:
             {
                 "insights": ["Insight 1", "Insight 2"],
-                "recommendedChartType": "bar" | "pie" | "line" | "none",
-                "suggestedQuestions": ["Question 1", "Question 2", "Question 3", "Question 4", "Question 5"]
+                "recommendedChartType": "bar" | "pie" | "line" | "none"
             }
 
             Rules:
@@ -82,8 +74,7 @@ class GeminiService {
             2. "recommendedChartType": Recommend the best chart type ("bar", "pie", "line") to visualize this data.
                - If the user explicitly asks for a specific chart type in their question (e.g., "as a pie chart"), YOU MUST return that type.
                - If no visualization is appropriate, return "none".
-            3. "suggestedQuestions": Provide exactly 5 relevant follow-up questions that the user might want to ask based on the current data and context. Make them specific and actionable.
-            4. Return ONLY the JSON object, no markdown formatting.
+            3. Return ONLY the JSON object, no markdown formatting.
             `;
 
             const result = await this.model.generateContent(prompt);
@@ -99,9 +90,46 @@ class GeminiService {
             logger.error(`Gemini Insight Error: ${error.message}`);
             return {
                 insights: ["Could not generate insights due to an error."],
-                recommendedChartType: "bar",
-                suggestedQuestions: []
+                recommendedChartType: "bar"
             };
+        }
+    }
+    async generateStarterQuestions(schema) {
+        if (this.apiKey === 'dummy_key_change_me' || !this.apiKey) {
+            return [
+                "Show me all records",
+                "How many total entries are there?",
+                "What are the top 10 items?",
+                "Show me recent entries from this year",
+                "Display data grouped by category"
+            ];
+        }
+        try {
+            const prompt = `
+            Database Schema: ${JSON.stringify(schema)}
+            
+            Generate 5 diverse and relevant starter questions that a user might ask about this database.
+            The questions should cover different aspects like aggregation, filtering, and listing.
+            Return ONLY a JSON array of strings, e.g., ["Question 1", "Question 2", ...].
+            `;
+
+            const result = await this.model.generateContent(prompt);
+            const response = await result.response;
+            const text = response.text().trim();
+
+            const jsonMatch = text.match(/\[[\s\S]*\]/);
+            const jsonStr = jsonMatch ? jsonMatch[0] : text;
+
+            return JSON.parse(jsonStr);
+        } catch (error) {
+            logger.error(`Gemini Starter Questions Error: ${error.message}`);
+            return [
+                "Show me all records",
+                "How many total entries are there?",
+                "What are the top 10 items?",
+                "Show me recent entries from this year",
+                "Display data grouped by category"
+            ];
         }
     }
 }

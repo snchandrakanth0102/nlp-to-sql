@@ -27,6 +27,14 @@ const QueryHistory = sequelize.define('QueryHistory', {
         type: DataTypes.INTEGER,
         allowNull: true,
     },
+    conversationId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+            model: 'Conversations', // Note: Sequelize pluralizes table names by default
+            key: 'id',
+        },
+    },
 });
 
 module.exports = QueryHistory;

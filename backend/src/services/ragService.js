@@ -38,6 +38,22 @@ class RAGService {
         }
     }
 
+    async getSchema(connectionId) {
+        // Ensure vector store is loaded
+        await vectorStoreService.loading;
+
+        // Get all schema items for this connection
+        const schemaItems = vectorStoreService.store.filter(
+            item => item.connectionId === connectionId
+        );
+
+        // Return simplified schema structure (tableName and description)
+        return schemaItems.map(item => ({
+            tableName: item.tableName,
+            description: item.description
+        }));
+    }
+
     async generateSQL(question, connectionId, conversationHistory = []) {
         const connection = await connectionService.getConnectionById(connectionId);
 

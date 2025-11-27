@@ -3,60 +3,56 @@ const sequelize = require('../config/database');
 
 const Conversation = sequelize.define('Conversation', {
     id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
-        autoIncrement: true
     },
     connectionId: {
-        type: DataTypes.INTEGER,
-        allowNull: false
+        type: DataTypes.UUID,
+        allowNull: true,
+    },
+    title: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: 'New Conversation',
     },
     createdAt: {
         type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW
+        defaultValue: DataTypes.NOW,
     },
-    updatedAt: {
-        type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW
-    }
-}, {
-    tableName: 'conversations',
-    timestamps: true
 });
 
 const ConversationMessage = sequelize.define('ConversationMessage', {
     id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
-        autoIncrement: true
     },
     conversationId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         allowNull: false,
         references: {
-            model: 'conversations',
-            key: 'id'
-        }
+            model: 'Conversations',
+            key: 'id',
+        },
     },
     question: {
         type: DataTypes.TEXT,
-        allowNull: false
+        allowNull: false,
     },
     sql: {
         type: DataTypes.TEXT,
-        allowNull: false
+        allowNull: true,
     },
     createdAt: {
         type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW
-    }
-}, {
-    tableName: 'conversation_messages',
-    timestamps: false
+        defaultValue: DataTypes.NOW,
+    },
 });
 
-// Define associations
-Conversation.hasMany(ConversationMessage, { foreignKey: 'conversationId', as: 'messages' });
+// Define relationship
+Conversation.hasMany(ConversationMessage, { foreignKey: 'conversationId' });
 ConversationMessage.belongsTo(Conversation, { foreignKey: 'conversationId' });
 
 module.exports = { Conversation, ConversationMessage };
+

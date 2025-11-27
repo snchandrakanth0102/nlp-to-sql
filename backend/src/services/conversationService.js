@@ -50,6 +50,50 @@ class ConversationService {
             return null;
         }
     }
+
+    async getAllConversations(connectionId) {
+        try {
+            const conversations = await Conversation.findAll({
+                where: { connectionId },
+                order: [['createdAt', 'DESC']],
+                include: [{
+                    model: ConversationMessage,
+                    limit: 1,
+                    order: [['createdAt', 'ASC']]
+                }]
+            });
+            return conversations;
+        } catch (error) {
+            logger.error(`Error fetching conversations: ${error.message}`);
+            return [];
+        }
+    }
+
+    async getConversationWithMessages(conversationId) {
+        try {
+            const messages = await ConversationMessage.findAll({
+                where: { conversationId },
+                order: [['createdAt', 'ASC']]
+            });
+            return messages;
+        } catch (error) {
+            logger.error(`Error fetching conversation messages: ${error.message}`);
+            return [];
+        }
+    }
+
+    async updateConversationTitle(conversationId, title) {
+        try {
+            await Conversation.update(
+                { title },
+                { where: { id: conversationId } }
+            );
+            logger.info(`Updated conversation ${conversationId} title to: ${title}`);
+        } catch (error) {
+            logger.error(`Error updating conversation title: ${error.message}`);
+            throw error;
+        }
+    }
 }
 
 module.exports = new ConversationService();

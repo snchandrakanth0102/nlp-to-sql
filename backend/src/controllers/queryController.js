@@ -18,6 +18,59 @@ class QueryController {
         }
     }
 
+    async getStarterQuestions(req, res) {
+        try {
+            const { connectionId } = req.body;
+            // Fetch schema for the connection
+            const schema = await ragService.getSchema(connectionId);
+            const questions = await geminiService.generateStarterQuestions(schema);
+            res.json({ questions });
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    async createConversation(req, res) {
+        try {
+            const { connectionId } = req.body;
+            const conversation = await conversationService.createConversation(connectionId);
+            res.json(conversation);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    async getConversations(req, res) {
+        try {
+            const { connectionId } = req.params;
+            const conversations = await conversationService.getAllConversations(connectionId);
+            res.json(conversations);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    async getConversationMessages(req, res) {
+        try {
+            const { id } = req.params;
+            const messages = await conversationService.getConversationWithMessages(id);
+            res.json(messages);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    async updateConversation(req, res) {
+        try {
+            const { id } = req.params;
+            const { title } = req.body;
+            await conversationService.updateConversationTitle(id, title);
+            res.json({ success: true });
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
+
     async ask(req, res) {
         try {
             const { connectionId, question, conversationId } = req.body;
@@ -25,6 +78,7 @@ class QueryController {
             // 1. PRE-GUARDRAIL: Validate user input
             const preValidation = await preGuardrailService.validate(question, connectionId);
             if (!preValidation.passed) {
+                console.error('Pre-validation failed:', preValidation.violations);
                 return res.status(400).json({
                     error: 'Input validation failed',
                     violations: preValidation.violations
@@ -89,7 +143,8 @@ class QueryController {
                 generatedSql: postValidation.sanitizedSQL,
                 status: error ? 'error' : 'success',
                 errorMessage: error,
-                executionTimeMs
+                executionTimeMs,
+                conversationId: currentConversationId // Save conversation ID
             });
 
             // 7. Return response
@@ -128,6 +183,7 @@ class QueryController {
             res.json(response);
 
         } catch (error) {
+            console.error('Error in ask controller:', error);
             res.status(500).json({ error: error.message });
         }
     }
